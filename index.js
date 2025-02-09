@@ -99,36 +99,27 @@ const updateMarketData = async () => {
     console.log(
       `Market data update completed at ${new Date().toLocaleString()}`
     );
+    process.exit(0); // Exit successfully after completion
   } catch (error) {
     console.error("Error in update process:", error);
+    process.exit(1); // Exit with error code
   }
 };
 
-const startUpdateLoop = async () => {
-  while (true) {
-    try {
-      await updateMarketData();
-      console.log("Waiting 10 minutes before next update...");
-      await new Promise((resolve) => setTimeout(resolve, 10 * 60 * 1000)); // 10 minutes in milliseconds
-    } catch (error) {
-      console.error("Error in update loop:", error);
-      // Still wait 10 minutes before retrying even if there was an error
-      await new Promise((resolve) => setTimeout(resolve, 10 * 60 * 1000));
-    }
-  }
-};
-
-// Start the continuous update process
-console.log("Starting market data update service...");
-startUpdateLoop().catch(console.error);
+// Run the update once
+console.log("Starting one-time market data update...");
+updateMarketData().catch((error) => {
+  console.error("Fatal error:", error);
+  process.exit(1);
+});
 
 // Handle process termination gracefully
 process.on("SIGINT", () => {
-  console.log("Received SIGINT. Gracefully shutting down...");
+  console.log("Received SIGINT. Shutting down...");
   process.exit(0);
 });
 
 process.on("SIGTERM", () => {
-  console.log("Received SIGTERM. Gracefully shutting down...");
+  console.log("Received SIGTERM. Shutting down...");
   process.exit(0);
 });
